@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Sites{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Sites</h1></header>
+
+<section class="panel">
+  <h2>Conectar um site</h2>
+  <form method="post" action="{{ url_for('admin.site_create') }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="name" placeholder="Nome (ex.: Loja Principal)" required maxlength="120" aria-label="Nome do site">
+    <input name="domain" placeholder="Domínio (ex.: minhaloja.com.br)" required aria-label="Domínio">
+    <button class="btn btn-primary" type="submit">Conectar site</button>
+  </form>
+  <p class="muted">O widget só funciona em páginas deste domínio e de seus subdomínios.</p>
+</section>
+
+{% for site, total in rows %}
+<section class="panel">
+  <div class="panel-head">
+    <h2>{{ site.name }} <span class="muted">{{ site.domain }}</span></h2>
+    <form method="post" action="{{ url_for('admin.site_toggle', sid=site.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost" type="submit">{{ 'Desativar' if site.is_active else 'Ativar' }}</button>
+    </form>
+  </div>
+  <p class="muted">{{ total }} {{ 'reclamação' if total == 1 else 'reclamações' }} · {{ 'Ativo' if site.is_active else 'Desativado' }}</p>
+  <p>Cole antes de <code>&lt;/body&gt;</code> no site:</p>
+  <div class="snippet">
+    <pre><code>&lt;script src="{{ base_url }}/widget.js" data-key="{{ site.api_key }}" defer&gt;&lt;/script&gt;</code></pre>
+    <button class="btn btn-ghost" type="button" data-copy>Copiar código</button>
+  </div>
+</section>
+{% else %}
+<section class="panel"><p class="empty">Nenhum site conectado. Preencha o formulário acima para gerar o código do widget.</p></section>
+{% endfor %}
+{% endblock %}

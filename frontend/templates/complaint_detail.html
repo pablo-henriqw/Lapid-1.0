@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}{{ c.protocol }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div><a class="back" href="{{ url_for('admin.complaints') }}">Reclamações</a><h1 class="proto-h">{{ c.protocol }}</h1></div>
+  {{ badge(c) }}
+</header>
+
+<section class="grid-detail">
+  <div class="panel">
+    <h2>Relato do usuário</h2>
+    <p class="report">{{ c.description }}</p>
+    <dl class="meta">
+      <dt>Site</dt><dd>{{ c.site.name }} <span class="muted">({{ c.site.domain }})</span></dd>
+      <dt>Página</dt><dd><a href="{{ c.page_url }}" target="_blank" rel="noopener noreferrer nofollow">{{ c.page_url }}</a></dd>
+      <dt>Contato</dt><dd>{{ c.contact_email or 'Não informado' }}</dd>
+      <dt>Navegador</dt><dd class="muted">{{ c.user_agent or '—' }}</dd>
+      <dt>Recebida em</dt><dd>{{ c.created_at|localtime('%d/%m/%Y %H:%M:%S') }}</dd>
+    </dl>
+  </div>
+
+  <div class="stack">
+    <div class="panel">
+      <h2>Situação</h2>
+      <form method="post" action="{{ url_for('admin.complaint_status', cid=c.id) }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <select name="status" aria-label="Nova situação">
+          {% for k, v in statuses.items() %}<option value="{{ k }}" {{ 'selected' if c.status == k }}>{{ v }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Salvar situação</button>
+      </form>
+    </div>
+    <div class="panel">
+      <h2>Histórico</h2>
+      <ol class="timeline">
+        {% for h in history %}
+          <li><span class="muted">{{ h.created_at|localtime }}</span><span>{{ h.details or h.action }}</span><span class="muted">por {{ h.actor }}</span></li>
+        {% else %}<li class="empty">Sem registros.</li>{% endfor %}
+      </ol>
+    </div>
+  </div>
+</section>
+{% endblock %}

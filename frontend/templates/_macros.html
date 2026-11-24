@@ -1,0 +1,12 @@
+{% macro badge(c) %}<span class="badge badge-{{ c.status }}">{{ c.status_label }}</span>{% endmacro %}
+
+{% macro pager(page, endpoint) %}
+{% if page.pages > 1 %}
+<div class="pager">
+  {% set args = request.args.to_dict() %}
+  {% if page.has_prev %}<a class="btn btn-ghost" href="{{ url_for(endpoint, **dict(args, page=page.prev_num)) }}">Anterior</a>{% endif %}
+  <span class="muted">Página {{ page.page }} de {{ page.pages }}</span>
+  {% if page.has_next %}<a class="btn btn-ghost" href="{{ url_for(endpoint, **dict(args, page=page.next_num)) }}">Próxima</a>{% endif %}
+</div>
+{% endif %}
+{% endmacro %}

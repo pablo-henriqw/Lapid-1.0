@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, pager %}
+{% block title %}Reclamações{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Reclamações</h1><span class="muted">{{ page.total }} {{ 'resultado' if page.total == 1 else 'resultados' }}</span></header>
+
+<form class="filters" method="get">
+  <input type="search" name="q" value="{{ f.q }}" placeholder="Buscar por protocolo ou texto" aria-label="Buscar">
+  <select name="status" aria-label="Situação">
+    <option value="">Todas as situações</option>
+    {% for k, v in statuses.items() %}<option value="{{ k }}" {{ 'selected' if f.status == k }}>{{ v }}</option>{% endfor %}
+  </select>
+  <select name="site" aria-label="Site">
+    <option value="">Todos os sites</option>
+    {% for s in sites %}<option value="{{ s.id }}" {{ 'selected' if f.site == s.id }}>{{ s.name }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-primary" type="submit">Filtrar</button>
+</form>
+
+<section class="panel">
+{% if page.items %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Protocolo</th><th>Site</th><th>Relato</th><th>Situação</th><th>Recebida em</th></tr></thead>
+    <tbody>
+    {% for c in page.items %}
+      <tr>
+        <td><a class="proto" href="{{ url_for('admin.complaint_detail', cid=c.id) }}">{{ c.protocol }}</a></td>
+        <td>{{ c.site.name }}</td>
+        <td class="clip">{{ c.description }}</td>
+        <td>{{ badge(c) }}</td>
+        <td class="muted nowrap">{{ c.created_at|localtime }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {{ pager(page, 'admin.complaints') }}
+{% else %}
+  <p class="empty">Nenhuma reclamação encontrada com esses filtros.</p>
+{% endif %}
+</section>
+{% endblock %}

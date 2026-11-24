@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Visão geral{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Visão geral</h1></header>
+
+<section class="stats">
+  <div class="stat"><span class="stat-n">{{ stats.total }}</span><span class="stat-l">reclamações recebidas</span></div>
+  <div class="stat stat-hot"><span class="stat-n">{{ stats.new }}</span><span class="stat-l">aguardando triagem</span></div>
+  <div class="stat"><span class="stat-n">{{ stats.in_review }}</span><span class="stat-l">em análise</span></div>
+  <div class="stat"><span class="stat-n">{{ stats.resolved }}</span><span class="stat-l">resolvidas</span></div>
+</section>
+
+<section class="grid-2">
+  <div class="panel">
+    <div class="panel-head"><h2>Últimos 14 dias</h2><span class="muted">{{ stats.last14 }} reclamações</span></div>
+    <svg class="chart" viewBox="0 0 392 120" role="img" aria-label="Reclamações por dia nos últimos 14 dias">
+      <line x1="0" y1="100.5" x2="392" y2="100.5" class="chart-base"/>
+      {% for b in bars %}
+        <rect x="{{ b.x }}" y="{{ b.y }}" width="20" height="{{ b.h }}" rx="4" class="chart-bar{% if b.n == 0 %} chart-empty{% endif %}"><title>{{ b.label }}: {{ b.n }}</title></rect>
+        <text x="{{ b.x + 10 }}" y="114" text-anchor="middle" class="chart-tick">{{ b.day }}</text>
+      {% endfor %}
+    </svg>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h2>Sites monitorados</h2></div>
+    <p class="big">{{ sites_active }}</p>
+    <p class="muted">{% if sites_active %}conectados e recebendo relatos.{% else %}Nenhum site conectado ainda.{% endif %}</p>
+    <a class="btn btn-ghost" href="{{ url_for('admin.sites') }}">{% if sites_active %}Gerenciar sites{% else %}Conectar um site{% endif %}</a>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h2>Mais recentes</h2><a href="{{ url_for('admin.complaints') }}">Ver todas</a></div>
+  {% if recent %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Protocolo</th><th>Site</th><th>Relato</th><th>Situação</th><th>Recebida em</th></tr></thead>
+    <tbody>
+    {% for c in recent %}
+      <tr>
+        <td><a class="proto" href="{{ url_for('admin.complaint_detail', cid=c.id) }}">{{ c.protocol }}</a></td>
+        <td>{{ c.site.name }}</td>
+        <td class="clip">{{ c.description }}</td>
+        <td>{{ badge(c) }}</td>
+        <td class="muted nowrap">{{ c.created_at|localtime }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}
+    <p class="empty">Nenhuma reclamação ainda. Conecte um site e instale o widget para começar a receber relatos.</p>
+  {% endif %}
+</section>
+{% endblock %}
